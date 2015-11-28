@@ -1,0 +1,24 @@
+{
+  "name": "mapcompare",
+  "description": "Web-app to compare maps against each other",
+  "version": "0.1.0",
+  "devDependencies": {
+    "babel-plugin-syntax-trailing-function-commas": "^6.1.18",
+    "babel-preset-es2015": "^6.1.18",
+    "babel-preset-react": "^6.1.18",
+    "babelify": "^7.2.0",
+    "browserify": "^12.0.1",
+    "gulp": "^3.9.0",
+    "gulp-if": "^2.0.0",
+    "gulp-streamify": "^1.0.2",
+    "gulp-uglify": "^1.5.1",
+    "gulp-util": "^3.0.7",
+    "node-env": "^0.1.6",
+    "vinyl-source-stream": "^1.1.0"
+  },
+  "dependencies": {
+    "react": "^0.14.3",
+    "react-dom": "^0.14.3",
+    "react-google-maps": "^4.6.0"
+  }
+}

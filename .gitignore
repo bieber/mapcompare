@@ -1,0 +1,6 @@
+*~
+.\#*
+\#*
+src/config/config.js
+build/
+node_modules/
