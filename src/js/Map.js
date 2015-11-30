@@ -127,9 +127,8 @@ export default class Map extends React.Component {
 					className="map_window_drag_handle"
 					draggable={true}
 					onDragStart={this.onResizeStart.bind(this)}
-					onDrag={this.onResize.bind(this)}>
-					=
-				</div>
+					onDrag={this.onResize.bind(this)}
+				/>
 				<a
 					className="map_window_x"
 					onClick={this.onClose.bind(this)}>

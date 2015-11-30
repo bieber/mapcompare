@@ -86,7 +86,7 @@ div.map_window_drag_handle {
 	font-weight: bold;
 	font-size: 20px;
 
-	cursor: move;
+	cursor: se-resize;
 
 	position: absolute;
 	bottom: 0;
