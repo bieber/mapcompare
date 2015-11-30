@@ -28,7 +28,7 @@ const MS_BETWEEN_RESIZES = 250;
 export default class Map extends React.Component {
 	constructor(props, context) {
 		super(props, context);
-		this.lastTimeResized = Date.now();
+		this.resizeTimeout = null;
 		this.moveStart = null;
 		this.positionStart = null;
 		this.resizeStart = null;
@@ -40,9 +40,17 @@ export default class Map extends React.Component {
 		var heightChanged = prevProps.height !== this.props.height;
 		if (widthChanged || heightChanged) {
 			// Debouncing this a little keeps the UI responsive on resize
-			if (Date.now() - this.lastTimeResized > MS_BETWEEN_RESIZES) {
-				google.maps.event.trigger(this.refs.map.props.map, 'resize');
-				this.lastTimeResized = Date.now();
+			if (this.resizeTimeout === null) {
+				this.resizeTimeout = setTimeout(
+					() => {
+						google.maps.event.trigger(
+							this.refs.map.props.map,
+							'resize',
+						);
+						this.resizeTimeout = null;
+					},
+					MS_BETWEEN_RESIZES,
+				);
 			}
 		}
 	}
@@ -119,8 +127,7 @@ export default class Map extends React.Component {
 					className="map_window_drag_handle"
 					draggable={true}
 					onDragStart={this.onResizeStart.bind(this)}
-					onDrag={this.onResize.bind(this)}
-					onClick={e => e.stopPropagtion() && e.preventDefault()}>
+					onDrag={this.onResize.bind(this)}>
 					=
 				</div>
 				<a
