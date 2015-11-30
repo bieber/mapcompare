@@ -20,24 +20,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import {GoogleMap, GoogleMapLoader} from 'react-google-maps';
+import WorkSpace from './WorkSpace.js';
 
 import Config from '../config/config.js';
 
 window.init = () => {
-	var map = (
-		<GoogleMap
-			defaultZoom={3}
-			center={{lat: 0, lng: 0}}
-		/>
-	);
-	var container = <div className="container" />;
-	
 	ReactDOM.render(
-		<GoogleMapLoader
-			googleMapElement={map}
-			containerElement={container}
-		/>,
+		<WorkSpace />,
 		document.getElementById('top_container'),
 	);
 }
