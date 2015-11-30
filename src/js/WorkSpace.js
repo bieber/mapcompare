@@ -18,15 +18,21 @@
  */
 
 import React from 'react';
+import update from 'react-addons-update';
 
 import MainControls from './MainControls.js';
+import Map from './Map.js';
 
 export default class WorkSpace extends React.Component {
 	constructor(props, context) {
 		super(props, context);
+
+		this.lastMapID = 0;
+
 		this.state = {
 			globalSyncMovement: false,
 			globalSyncZoom: false,
+			maps: [],
 		};
 	}
 
@@ -39,10 +45,48 @@ export default class WorkSpace extends React.Component {
 	}
 
 	onAddMap() {
-		console.log('Added map');
+		var maps = update(this.state.maps, {});
+		var newID = this.lastMapID++;
+		maps[newID] = {
+			id: newID,
+			left: 50,
+			top: 50,
+			width: 400,
+			height: 300,
+			center: {lat: 0, lng: 0},
+			zoom: 3,
+		};
+		this.setState({maps});
+	}
+
+	onMapPropsChanged(mapID, newPosition) {
+		var delta = {};
+		delta[mapID] = {$merge: newPosition};
+		var maps = update(this.state.maps, delta);
+		this.setState({maps});
+	}
+
+	onMapClosed(mapID) {
+		var maps = update(this.state.maps, {});
+		delete maps[mapID];
+		this.setState({maps});
 	}
 
 	render() {
+		var renderedMaps = [];
+		for (var i in this.state.maps) {
+			let map = this.state.maps[i];
+			renderedMaps.push(
+				<Map
+					key={i}
+					onMove={this.onMapPropsChanged.bind(this, i)}
+					onResize={this.onMapPropsChanged.bind(this, i)}
+					onClose={this.onMapClosed.bind(this, i)}
+					{...map}
+				/>
+			);
+		}
+
 		var globalSyncMovementHandler = this.onGlobalSyncMovementChanged
 			.bind(this);
 		var globalSyncZoomHandler = this.onGlobalSyncZoomChanged
@@ -57,6 +101,7 @@ export default class WorkSpace extends React.Component {
 					onSyncZoomChanged={globalSyncZoomHandler}
 					onAddMap={this.onAddMap.bind(this)}
 				/>
+				{renderedMaps}
 			</div>
 		);
 	}
