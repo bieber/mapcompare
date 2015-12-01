@@ -92,6 +92,15 @@ export default class Map extends React.Component {
 		event.stopPropagation();
 	}
 
+	onZoomChanged() {
+		this.props.onZoomChange(this.refs.map.getZoom());
+	}
+
+	onCenterChanged() {
+		var center = this.refs.map.getCenter();
+		this.props.onCenterChange({lat: center.lat(), lng: center.lng()});
+	}
+
 	render() {
 		var mapContainer = <div className="map_container" />;
 		var map = (
@@ -99,6 +108,8 @@ export default class Map extends React.Component {
 				ref="map"
 				center={this.props.center}
 				zoom={this.props.zoom}
+				onCenterChanged={this.onCenterChanged.bind(this)}
+				onZoomChanged={this.onZoomChanged.bind(this)}
 			/>
 		);
 
@@ -150,6 +161,8 @@ Map.propTypes = {
 	onMove: React.PropTypes.func.isRequired,
 	onResize: React.PropTypes.func.isRequired,
 	onClose: React.PropTypes.func.isRequired,
+	onCenterChange: React.PropTypes.func.isRequired,
+	onZoomChange: React.PropTypes.func.isRequired,
 	id: React.PropTypes.number.isRequired,
 	zOrder: React.PropTypes.number.isRequired,
 	left: React.PropTypes.number.isRequired,

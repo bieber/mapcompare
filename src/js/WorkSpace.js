@@ -85,6 +85,42 @@ export default class WorkSpace extends React.Component {
 		this.setState({maps});
 	}
 
+	onMapZoomChanged(mapID, newZoom) {
+		var delta = {};
+		if (this.state.globalSyncZoom) {
+			for (let i in this.state.maps) {
+				delta[i] = {$merge: {zoom: newZoom}};
+			}
+		} else {
+			delta[mapID] = {$merge: {zoom: newZoom}};
+		}
+		this.setState({maps: update(this.state.maps, delta)});
+	}
+
+	onMapCenterChanged(mapID, newCenter) {
+		var delta = {};
+		if (this.state.globalSyncMovement) {
+			var selectedMap = this.state.maps[mapID];
+			var dLat = newCenter.lat - selectedMap.center.lat;
+			var dLng = newCenter.lng - selectedMap.center.lng;
+
+			for (let i in this.state.maps) {
+				let map = this.state.maps[i];
+				delta[i] = {
+					$merge: {
+						center: {
+							lat: map.center.lat + dLat,
+							lng: map.center.lng + dLng,
+						},
+					},
+				};
+			}
+		} else {
+			delta[mapID] = {$merge: {center: newCenter}};
+		}
+		this.setState({maps: update(this.state.maps, delta)});
+	}
+
 	render() {
 		var renderedMaps = [];
 		for (var i in this.state.maps) {
@@ -96,6 +132,8 @@ export default class WorkSpace extends React.Component {
 					onMove={this.onMapPropsChanged.bind(this, i)}
 					onResize={this.onMapPropsChanged.bind(this, i)}
 					onClose={this.onMapClosed.bind(this, i)}
+					onCenterChange={this.onMapCenterChanged.bind(this, i)}
+					onZoomChange={this.onMapZoomChanged.bind(this, i)}
 					{...map}
 				/>
 			);
