@@ -85,7 +85,6 @@ export default class Map extends React.Component {
 			width: Math.max(this.sizeStart.width + dw, MIN_WIDTH),
 			height: Math.max(this.sizeStart.height + dh, MIN_HEIGHT),
 		});
-		event.stopPropagation();
 	}
 
 	onClose(event) {
@@ -108,6 +107,7 @@ export default class Map extends React.Component {
 			top: this.props.top+'px',
 			width: this.props.width+'px',
 			height: this.props.height+'px',
+			zIndex: this.props.zOrder * 10 + 50,
 		};
 
 		var windowHeaderStyle = {
@@ -115,7 +115,10 @@ export default class Map extends React.Component {
 		};
 
 		return (
-			<div className="map_window" style={windowStyle}>
+			<div
+				className="map_window"
+				style={windowStyle}
+				onMouseDown={this.props.onFocus}>
 				<div
 					className="map_window_header"
 					style={{width: this.props.width+'px'}}
@@ -143,10 +146,12 @@ export default class Map extends React.Component {
 	}
 }
 Map.propTypes = {
+	onFocus: React.PropTypes.func.isRequired,
 	onMove: React.PropTypes.func.isRequired,
 	onResize: React.PropTypes.func.isRequired,
 	onClose: React.PropTypes.func.isRequired,
 	id: React.PropTypes.number.isRequired,
+	zOrder: React.PropTypes.number.isRequired,
 	left: React.PropTypes.number.isRequired,
 	top: React.PropTypes.number.isRequired,
 	width: React.PropTypes.number.isRequired,

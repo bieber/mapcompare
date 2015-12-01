@@ -49,14 +49,27 @@ export default class WorkSpace extends React.Component {
 		var newID = this.lastMapID++;
 		maps[newID] = {
 			id: newID,
-			left: 50,
-			top: 50,
+			zOrder: newID,
+			left: 50 + 20 * newID,
+			top: 50 + 20 * newID,
 			width: 400,
 			height: 300,
 			center: {lat: 0, lng: 0},
 			zoom: 3,
 		};
 		this.setState({maps});
+	}
+
+	onMapFocused(mapID) {
+		var delta = {};
+		delta[mapID] = {$merge: {zOrder: this.lastMapID - 1}};
+		for (let i in this.state.maps) {
+			let map = this.state.maps[i];
+			if (map.zOrder > this.state.maps[mapID].zOrder) {
+				delta[i] = {$merge: {zOrder: map.zOrder - 1}};
+			}
+		}
+		this.setState({maps: update(this.state.maps, delta)});
 	}
 
 	onMapPropsChanged(mapID, newPosition) {
@@ -79,6 +92,7 @@ export default class WorkSpace extends React.Component {
 			renderedMaps.push(
 				<Map
 					key={i}
+					onFocus={this.onMapFocused.bind(this, i)}
 					onMove={this.onMapPropsChanged.bind(this, i)}
 					onResize={this.onMapPropsChanged.bind(this, i)}
 					onClose={this.onMapClosed.bind(this, i)}
