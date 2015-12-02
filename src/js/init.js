@@ -41,6 +41,7 @@ export default function() {
 	scriptTag.src = ''+
 		'https://maps.googleapis.com/maps/api/js'+
 		'?key='+Config.apiKey+
+		'&libraries=places'+
 		'&callback=init';
 	document.body.appendChild(scriptTag);
 }

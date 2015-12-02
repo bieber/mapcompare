@@ -19,15 +19,23 @@
 
 import React from 'react';
 
-import {GoogleMapLoader, GoogleMap} from 'react-google-maps';
+import {GoogleMapLoader, GoogleMap, Marker, SearchBox} from 'react-google-maps';
 
 const MIN_WIDTH = 100;
 const MIN_HEIGHT = 100;
 const MS_BETWEEN_RESIZES = 250;
 
+const searchBoxStyle = {
+	marginTop: '10px',
+	marginRight: '10px',
+};
+
 export default class Map extends React.Component {
 	constructor(props, context) {
 		super(props, context);
+
+		this.state = {markers: []};
+
 		this.resizeTimeout = null;
 		this.moveStart = null;
 		this.positionStart = null;
@@ -101,7 +109,37 @@ export default class Map extends React.Component {
 		this.props.onCenterChange({lat: center.lat(), lng: center.lng()});
 	}
 
+	onPlacesChanged() {
+		var markers = this.refs.searchBox.getPlaces().map(
+			(p, i, ps) => ({
+				lat: p.geometry.location.lat(),
+				lng: p.geometry.location.lng(),
+			}),
+		);
+		if (markers.length > 0) {
+			this.props.onCenterChange(markers[0]);
+		}
+		this.setState({markers});
+	}
+
 	render() {
+		var markers = [];
+		for (let i = 0; i < this.state.markers.length; i++) {
+			let location = this.state.markers[i];
+			markers.push(
+				<Marker
+					key={i}
+					position={location}
+					onClick={this.props.onCenterChange.bind(null, location)}
+				/>,
+			);
+		}
+
+		var searchBoxBounds = null;
+		var existingMap = this.refs.map;
+		if (existingMap) {
+			searchBoxBounds = existingMap.getBounds();
+		}
 		var mapContainer = <div className="map_container" />;
 		var map = (
 			<GoogleMap
@@ -109,8 +147,16 @@ export default class Map extends React.Component {
 				center={this.props.center}
 				zoom={this.props.zoom}
 				onCenterChanged={this.onCenterChanged.bind(this)}
-				onZoomChanged={this.onZoomChanged.bind(this)}
-			/>
+				onZoomChanged={this.onZoomChanged.bind(this)}>
+				<SearchBox
+					ref="searchBox"
+					style={searchBoxStyle}
+					controlPosition={google.maps.ControlPosition.TOP_RIGHT}
+					bounds={searchBoxBounds}
+					onPlacesChanged={this.onPlacesChanged.bind(this)}
+				/>
+				{markers}
+			</GoogleMap>
 		);
 
 		var windowStyle = {
