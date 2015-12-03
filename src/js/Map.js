@@ -24,6 +24,7 @@ import {GoogleMapLoader, GoogleMap, Marker, SearchBox} from 'react-google-maps';
 const MIN_WIDTH = 100;
 const MIN_HEIGHT = 100;
 const MS_BETWEEN_RESIZES = 250;
+const MS_GEOMETRY_DELAY = 50;
 
 const searchBoxStyle = {
 	marginTop: '10px',
@@ -100,13 +101,32 @@ export default class Map extends React.Component {
 		event.stopPropagation();
 	}
 
-	onZoomChanged() {
-		this.props.onZoomChange(this.refs.map.getZoom());
+
+	onGeometryChanged() {
+		var center = this.refs.map.getCenter();
+		var zoom = this.refs.map.getZoom();
+		this.props.onCenterChange({
+			lat: center.lat(),
+			lng: center.lng(),
+		});
+		this.props.onZoomChange(zoom);
 	}
 
 	onCenterChanged() {
-		var center = this.refs.map.getCenter();
-		this.props.onCenterChange({lat: center.lat(), lng: center.lng()});
+		// This is kind of a weird hack.  The problem I was running
+		// into is that using a GoogleMap in controlled mode doesn't
+		// really mesh with Google's event model.  When you update the
+		// map by double-clicking a point or scrolling the mouse, two
+		// things happen: first you get a center changed event, then
+		// you get a zoom changed event.  The problem is that if you
+		// have this set up as a controlled component, your reaction
+		// to the center changed event will trigger a rerender and
+		// you'll never receive the zoom event.  So I've sidestepped
+		// this a little bit by delayig the check and then just
+		// simultaneously checking the center and zoom level, which
+		// seems to work and doesn't disrupt the UI with a minimal
+		// delay length.
+		setTimeout(this.onGeometryChanged.bind(this), MS_GEOMETRY_DELAY);
 	}
 
 	onPlacesChanged() {
@@ -147,7 +167,7 @@ export default class Map extends React.Component {
 				center={this.props.center}
 				zoom={this.props.zoom}
 				onCenterChanged={this.onCenterChanged.bind(this)}
-				onZoomChanged={this.onZoomChanged.bind(this)}>
+				onZoomChanged={this.onGeometryChanged.bind(this)}>
 				<SearchBox
 					ref="searchBox"
 					style={searchBoxStyle}
