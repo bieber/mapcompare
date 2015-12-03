@@ -65,6 +65,7 @@ div.map_window_header {
 	top: 0;
 	left: 0;
 	height: 35px;
+	right: 0;
 
 	border-radius: 10px;
 	cursor: move;

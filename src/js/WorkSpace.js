@@ -22,6 +22,7 @@ import update from 'react-addons-update';
 
 import MainControls from './MainControls.js';
 import Map from './Map.js';
+import Window from './Window.js';
 
 export default class WorkSpace extends React.Component {
 	constructor(props, context) {
@@ -125,17 +126,29 @@ export default class WorkSpace extends React.Component {
 		var renderedMaps = [];
 		for (var i in this.state.maps) {
 			let map = this.state.maps[i];
+			let {
+				center,
+				zoom,
+				width,
+				height,
+				...windowProps,
+			} = this.state.maps[i];
+
 			renderedMaps.push(
-				<Map
+				<Window
 					key={i}
 					onFocus={this.onMapFocused.bind(this, i)}
 					onMove={this.onMapPropsChanged.bind(this, i)}
 					onResize={this.onMapPropsChanged.bind(this, i)}
 					onClose={this.onMapClosed.bind(this, i)}
-					onCenterChange={this.onMapCenterChanged.bind(this, i)}
-					onZoomChange={this.onMapZoomChanged.bind(this, i)}
-					{...map}
-				/>
+					{...{width, height}}
+					{...windowProps}>
+					<Map
+						onCenterChange={this.onMapCenterChanged.bind(this, i)}
+						onZoomChange={this.onMapZoomChanged.bind(this, i)}
+						{...{width, height, center, zoom}}
+					/>
+				</Window>
 			);
 		}
 

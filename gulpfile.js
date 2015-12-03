@@ -35,10 +35,8 @@ gulp.task('build', function() {
 			{
 				presets: [
 					'es2015',
+					'stage-0',
 					'react',
-				],
-				plugins: [
-					'syntax-trailing-function-commas',
 				],
 			}
 		).require('./src/js/init.js', {expose: 'init'})
