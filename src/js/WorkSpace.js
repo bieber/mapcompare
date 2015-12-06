@@ -24,6 +24,8 @@ import MainControls from './MainControls.js';
 import Map from './Map.js';
 import Window from './Window.js';
 
+import {highlightIndex} from './zIndices.js';
+
 export default class WorkSpace extends React.Component {
 	constructor(props, context) {
 		super(props, context);
@@ -34,6 +36,8 @@ export default class WorkSpace extends React.Component {
 			globalSyncMovement: false,
 			globalSyncZoom: false,
 			maps: [],
+			dragMap: null,
+			dragPosition: null,
 		};
 	}
 
@@ -129,6 +133,38 @@ export default class WorkSpace extends React.Component {
 		this.setState({maps: update(this.state.maps, delta)});
 	}
 
+	onMapDragStarted(mapID) {
+		this.setState({dragMap: mapID});
+	}
+
+	onMapDragged(position) {
+		this.setState({dragPosition: position});
+	}
+
+	onMapDragEnded() {
+		this.setState({dragMap: null, dragPosition: null});
+	}
+
+	getHighlightedMap() {
+		if (this.state.dragPosition === null) {
+			return null;
+		}
+
+		var position = this.state.dragPosition;
+		var matching = this.state.maps
+			.filter(
+				m => (
+					m.id !== parseInt(this.state.dragMap) &&
+					m.left <= position.x &&
+					m.left + m.width >= position.x &&
+					m.top <= position.y &&
+					m.top + m.height >= position.y
+				),
+			).sort((a, b) => b.zOrder - a.zOrder);
+
+		return matching.length === 0 ? null : matching[0];
+	}
+
 	render() {
 		var renderedMaps = [];
 		for (var i in this.state.maps) {
@@ -149,6 +185,9 @@ export default class WorkSpace extends React.Component {
 					onResize={this.onMapPropsChanged.bind(this, i)}
 					onClose={this.onMapClosed.bind(this, i)}
 					onTitleChange={this.onMapTitleChanged.bind(this, i)}
+					onDragStart={this.onMapDragStarted.bind(this, i)}
+					onDrag={::this.onMapDragged}
+					onDragEnd={::this.onMapDragEnded}
 					{...{width, height}}
 					{...windowProps}>
 					<Map
@@ -160,20 +199,34 @@ export default class WorkSpace extends React.Component {
 			);
 		}
 
-		var globalSyncMovementHandler = this.onGlobalSyncMovementChanged
-			.bind(this);
-		var globalSyncZoomHandler = this.onGlobalSyncZoomChanged
-			.bind(this);
+		var highlightDiv = null;
+		var highlightedMap = this.getHighlightedMap();
+		if (highlightedMap !== null) {
+			var highlightStyle = {
+				zIndex: highlightIndex(highlightedMap.zOrder),
+				top: highlightedMap.top,
+				left: highlightedMap.left,
+				width: (highlightedMap.width - 18)+'px',
+				height: (highlightedMap.height - 18)+'px',
+			};
+			highlightDiv = (
+				<div
+					className="map_highlight"
+					style={highlightStyle}
+				/>
+			);
+		}
 
 		return (
 			<div className="container">
 				<MainControls
 					syncMovement={this.state.globalSyncMovement}
 					syncZoom={this.state.globalSyncZoom}
-					onSyncMovementChanged={globalSyncMovementHandler}
-					onSyncZoomChanged={globalSyncZoomHandler}
-					onAddMap={this.onAddMap.bind(this)}
+					onSyncMovementChanged={::this.onGlobalSyncMovementChanged}
+					onSyncZoomChanged={::this.onGlobalSyncZoomChanged}
+					onAddMap={::this.onAddMap}
 				/>
+				{highlightDiv}
 				{renderedMaps}
 			</div>
 		);

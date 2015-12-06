@@ -19,6 +19,8 @@
 
 import React from 'react';
 
+import {windowIndex} from './zIndices.js';
+
 const MIN_WIDTH = 200;
 const MIN_HEIGHT = 200;
 
@@ -39,9 +41,10 @@ export default class Window extends React.Component {
 		this.sizeStart = null;
 	}
 
-		onMoveStart(event) {
+	onMoveStart(event) {
 		this.moveStart = {x: event.clientX, y: event.clientY};
 		this.positionStart = {left: this.props.left, top: this.props.top};
+		this.props.onDragStart();
 	}
 
 	onMove(event) {
@@ -52,6 +55,7 @@ export default class Window extends React.Component {
 			left: this.positionStart.left + event.clientX - this.moveStart.x,
 			top: this.positionStart.top + event.clientY - this.moveStart.y,
 		});
+		this.props.onDrag({x: event.clientX, y: event.clientY});
  	}
 
 	onResizeStart(event) {
@@ -103,7 +107,7 @@ export default class Window extends React.Component {
 			top: this.props.top+'px',
 			width: this.props.width+'px',
 			height: this.props.height+'px',
-			zIndex: this.props.zOrder * 10 + 50,
+			zIndex: windowIndex(this.props.zOrder),
 		};
 
 		var titleLabel = null;
@@ -116,9 +120,10 @@ export default class Window extends React.Component {
 					className="map_window_header"
 					style={{width: this.props.width+'px'}}
 					draggable={true}
-					onDragStart={this.onMoveStart.bind(this)}
-					onDrag={this.onMove.bind(this)}
-					onDoubleClick={this.onTitleEditStart.bind(this)}
+					onDragStart={::this.onMoveStart}
+					onDrag={::this.onMove}
+					onDragEnd={this.props.onDragEnd}
+					onDoubleClick={::this.onTitleEditStart}
 				/>
 			);
 		} else {
@@ -128,8 +133,8 @@ export default class Window extends React.Component {
 					className="map_window_title_editor"
 					type="text"
 					value={this.state.titleEdit}
-					onChange={this.onTitleEdit.bind(this)}
-					onKeyUp={this.onTitleEditFinish.bind(this)}
+					onChange={::this.onTitleEdit}
+					onKeyUp={::this.onTitleEditFinish}
 				/>
 			);
 		}
@@ -144,13 +149,13 @@ export default class Window extends React.Component {
 				<div
 					className="map_window_drag_handle"
 					draggable={true}
-					onDragStart={this.onResizeStart.bind(this)}
-					onDrag={this.onResize.bind(this)}
+					onDragStart={::this.onResizeStart}
+					onDrag={::this.onResize}
 				/>
 				{titleEditor}
 				<a
 					className="map_window_x"
-					onClick={this.onClose.bind(this)}>
+					onClick={::this.onClose}>
 					X
 				</a>
 				{this.props.children}
@@ -164,6 +169,9 @@ Window.propTypes = {
 	onResize: React.PropTypes.func.isRequired,
 	onClose: React.PropTypes.func.isRequired,
 	onTitleChange: React.PropTypes.func.isRequired,
+	onDragStart: React.PropTypes.func.isRequired,
+	onDrag: React.PropTypes.func.isRequired,
+	onDragEnd: React.PropTypes.func.isRequired,
 	zOrder: React.PropTypes.number.isRequired,
 	left: React.PropTypes.number.isRequired,
 	top: React.PropTypes.number.isRequired,
