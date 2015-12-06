@@ -50,6 +50,7 @@ export default class WorkSpace extends React.Component {
 		var newID = this.lastMapID++;
 		maps[newID] = {
 			id: newID,
+			title: 'Map #'+(newID + 1),
 			zOrder: newID,
 			left: 50 + 20 * newID,
 			top: 50 + 20 * newID,
@@ -84,6 +85,12 @@ export default class WorkSpace extends React.Component {
 		var maps = update(this.state.maps, {});
 		delete maps[mapID];
 		this.setState({maps});
+	}
+
+	onMapTitleChanged(mapID, title) {
+		var delta = {};
+		delta[mapID] = {$merge: {title}};
+		this.setState({maps: update(this.state.maps, delta)});
 	}
 
 	onMapZoomChanged(mapID, newZoom) {
@@ -141,6 +148,7 @@ export default class WorkSpace extends React.Component {
 					onMove={this.onMapPropsChanged.bind(this, i)}
 					onResize={this.onMapPropsChanged.bind(this, i)}
 					onClose={this.onMapClosed.bind(this, i)}
+					onTitleChange={this.onMapTitleChanged.bind(this, i)}
 					{...{width, height}}
 					{...windowProps}>
 					<Map

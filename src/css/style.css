@@ -71,14 +71,37 @@ div.map_window_header {
 	cursor: move;
 }
 
+p.map_window_title {
+	color: white;
+	font-weight: bold;
+	font-size: 18px;
+
+	padding: 0px 0px 0px 0px;
+	margin: 0px 0px 0px 0px;
+
+	position: absolute;
+	top: 4px;
+	left: 12px;
+}
+
+input.map_window_title_editor {
+	position: absolute;
+	top: 4px;
+	left: 12px;
+	width: 150px;
+}
+
 a.map_window_x {
 	color: white;
 	font-weight: bold;
 	font-size: 20px;
 	cursor: pointer;
 
+	padding: 0px 0px 0px 0px;
+	margin: 0px 0px 0px 0px;
+
 	position: absolute;
-	top: 5px;
+	top: 4px;
 	right: 8px;
 }
 

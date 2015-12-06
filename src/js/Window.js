@@ -22,9 +22,15 @@ import React from 'react';
 const MIN_WIDTH = 200;
 const MIN_HEIGHT = 200;
 
+const ENTER = 13;
+
 export default class Window extends React.Component {
 	constructor(props, context) {
 		super(props, context);
+
+		this.state = {
+			titleEdit: null,
+		};
 
 		this.resizeTimeout = null;
 		this.moveStart = null;
@@ -65,6 +71,27 @@ export default class Window extends React.Component {
 		});
 	}
 
+	onTitleEditStart(event) {
+		this.setState(
+			{titleEdit: this.props.title},
+			() => this.refs.titleEditor.select(),
+		);
+	}
+
+	onTitleEdit(event) {
+		this.setState({titleEdit: event.target.value});
+	}
+
+	onTitleEditFinish(event) {
+		if (event.keyCode === ENTER) {
+			this.props.onTitleChange(this.state.titleEdit);
+			this.setState(
+				{titleEdit: null},
+				this.props.onTitleChange.bind(null, this.state.titleEdit),
+			);
+		}
+	}
+
 	onClose(event) {
 		this.props.onClose();
 		event.stopPropagation();
@@ -79,24 +106,48 @@ export default class Window extends React.Component {
 			zIndex: this.props.zOrder * 10 + 50,
 		};
 
-		return (
-			<div
-				className="map_window"
-				style={windowStyle}
-				onMouseDown={this.props.onFocus}>
+		var titleLabel = null;
+		var titleEditor = null;
+		var header = null;
+		if (this.state.titleEdit === null) {
+			titleLabel = <p className="map_window_title">{this.props.title}</p>;
+			header = (
 				<div
 					className="map_window_header"
 					style={{width: this.props.width+'px'}}
 					draggable={true}
 					onDragStart={this.onMoveStart.bind(this)}
 					onDrag={this.onMove.bind(this)}
+					onDoubleClick={this.onTitleEditStart.bind(this)}
 				/>
+			);
+		} else {
+			titleEditor = (
+				<input
+					ref="titleEditor"
+					className="map_window_title_editor"
+					type="text"
+					value={this.state.titleEdit}
+					onChange={this.onTitleEdit.bind(this)}
+					onKeyUp={this.onTitleEditFinish.bind(this)}
+				/>
+			);
+		}
+
+		return (
+			<div
+				className="map_window"
+				style={windowStyle}
+				onMouseDown={this.props.onFocus}>
+				{titleLabel}
+				{header}
 				<div
 					className="map_window_drag_handle"
 					draggable={true}
 					onDragStart={this.onResizeStart.bind(this)}
 					onDrag={this.onResize.bind(this)}
 				/>
+				{titleEditor}
 				<a
 					className="map_window_x"
 					onClick={this.onClose.bind(this)}>
@@ -112,9 +163,11 @@ Window.propTypes = {
 	onMove: React.PropTypes.func.isRequired,
 	onResize: React.PropTypes.func.isRequired,
 	onClose: React.PropTypes.func.isRequired,
+	onTitleChange: React.PropTypes.func.isRequired,
 	zOrder: React.PropTypes.number.isRequired,
 	left: React.PropTypes.number.isRequired,
 	top: React.PropTypes.number.isRequired,
 	width: React.PropTypes.number.isRequired,
 	height: React.PropTypes.number.isRequired,
+	title: React.PropTypes.string.isRequired,
 };
