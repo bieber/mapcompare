@@ -31,11 +31,13 @@ export default class WorkSpace extends React.Component {
 		super(props, context);
 
 		this.lastMapID = 0;
+		this.lastStackID = 0;
 
 		this.state = {
 			globalSyncMovement: false,
 			globalSyncZoom: false,
-			maps: [],
+			maps: {},
+			stacks: {},
 			dragMap: null,
 			dragPosition: null,
 		};
@@ -50,32 +52,41 @@ export default class WorkSpace extends React.Component {
 	}
 
 	onAddMap() {
-		var maps = update(this.state.maps, {});
+		var delta = {};
 		var newID = this.lastMapID++;
-		maps[newID] = {
-			id: newID,
-			title: 'Map #'+(newID + 1),
-			zOrder: newID,
-			left: 50 + 20 * newID,
-			top: 50 + 20 * newID,
-			width: 400,
-			height: 300,
-			center: {lat: 0, lng: 0},
-			zoom: 3,
+		delta[newID] = {
+			$set: {
+				id: newID,
+				stackID: null,
+				title: 'Map #'+(newID + 1),
+				zOrder: this.objectCount(),
+				left: 50 + 20 * newID,
+				top: 50 + 20 * newID,
+				width: 400,
+				height: 300,
+				center: {lat: 0, lng: 0},
+				zoom: 3,
+			},
 		};
-		this.setState({maps});
+		this.setState({maps: update(this.state.maps, delta)});
 	}
 
 	onMapFocused(mapID) {
-		var delta = {};
-		delta[mapID] = {$merge: {zOrder: this.lastMapID - 1}};
+		var delta = {maps: {}, stacks: {}};
+		delta.maps[mapID] = {$merge: {zOrder: this.objectCount() - 1}};
 		for (let i in this.state.maps) {
 			let map = this.state.maps[i];
 			if (map.zOrder > this.state.maps[mapID].zOrder) {
-				delta[i] = {$merge: {zOrder: map.zOrder - 1}};
+				delta.maps[i] = {$merge: {zOrder: map.zOrder - 1}};
 			}
 		}
-		this.setState({maps: update(this.state.maps, delta)});
+		for (let i in this.state.stacks) {
+			let stack = this.state.stacks[i];
+			if (stack.zOrder > this.state.maps[mapID].zOrder) {
+				delta.stacks[i] = {$merge: {zOrder: stack.zOrder - 1}};
+			}
+		}
+		this.setState(update(this.state, delta));
 	}
 
 	onMapPropsChanged(mapID, newPosition) {
@@ -142,7 +153,127 @@ export default class WorkSpace extends React.Component {
 	}
 
 	onMapDragEnded() {
-		this.setState({dragMap: null, dragPosition: null});
+		var delta = {
+			dragMap: {$set: null},
+			dragPosition: {$set: null},
+		};
+		var highlighted = this.getHighlightedMap();
+
+		if (highlighted !== null) {
+			delta.maps = {};
+			delta.stacks = {};
+
+			if (highlighted.stackID !== null) {
+				let stackID = highlighted.stackID;
+				let stack = this.state.stacks[stackID];
+				delta.maps[this.state.dragMap] = {
+					$merge: {
+						stackID,
+						left: stack.left,
+						top: stack.top,
+						width: stack.width,
+						height: stack.height,
+					},
+				};
+
+				let maps = this.state.stacks[stackID].maps;
+				delta.stacks[stackID] = {};
+				delta.stacks[stackID].maps = {};
+				delta.stacks[stackID].maps[this.state.dragMap] = {
+					$set: {
+						order: Object.keys(maps).length,
+						opacity: 100,
+					},
+				};
+			} else {
+				let newID = this.lastStackID++;
+
+				let mapsInfo = {};
+				mapsInfo[this.state.dragMap] = {
+					order: 1,
+					opacity: 100,
+				};
+				mapsInfo[highlighted.id] = {
+					order: 0,
+					opacity: 100,
+				};
+				delta.stacks[newID] = {
+					$set: {
+						id: newID,
+						title: 'Stack #'+(newID + 1),
+						zOrder: this.objectCount(),
+						left: highlighted.left,
+						top: highlighted.top,
+						width: highlighted.width,
+						height: highlighted.height,
+						maps: mapsInfo,
+					},
+				};
+
+				delta.maps[highlighted.id] = {$merge: {stackID: newID}};
+				delta.maps[this.state.dragMap] = {
+					$merge: {
+						stackID: newID,
+						left: highlighted.left,
+						top: highlighted.top,
+						width: highlighted.width,
+						height: highlighted.height,
+					},
+				};
+			}
+		}
+
+		this.setState(update(this.state, delta));
+	}
+
+	onStackFocused(stackID) {
+		var delta = {maps: {}, stacks: {}};
+		delta.stacks[stackID] = {$merge: {zOrder: this.objectCount() - 1}};
+		for (let i in this.state.maps) {
+			let map = this.state.maps[i];
+			if (map.zOrder > this.state.stacks[stackID].zOrder) {
+				delta.maps[i] = {$merge: {zOrder: map.zOrder - 1}};
+			}
+		}
+		for (let i in this.state.stacks) {
+			let stack = this.state.stacks[i];
+			if (stack.zOrder > this.state.stacks[stackID].zOrder) {
+				delta.stacks[i] = {$merge: {zOrder: stack.zOrder - 1}};
+			}
+		}
+		this.setState(update(this.state, delta));
+	}
+
+	onStackPropsChanged(stackID, newProps) {
+		var delta = {maps: {}, stacks: {}};
+		delta.stacks[stackID] = {$merge: newProps};
+		for (let i in this.state.stacks[stackID].maps) {
+			delta.maps[i] = {$merge: newProps};
+		}
+		this.setState(update(this.state, delta));
+	}
+
+	onStackClosed(stackID) {
+		var maps = update(this.state.maps, {});
+		var stacks = update(this.state.stacks, {});
+
+		for (let i in this.state.stacks[stackID].maps) {
+			delete maps[i];
+		}
+		delete stacks[stackID];
+
+		this.setState({maps, stacks});
+	}
+
+	onStackTitleChanged(stackID, title) {
+		var delta = {};
+		delta[stackID] = {$merge: {title}};
+		this.setState({stacks: update(this.state.stacks, delta)});
+	}
+
+	objectCount() {
+		return Object.keys(this.state.maps).length
+			+ Object.keys(this.state.stacks).length;
 	}
 
 	getHighlightedMap() {
@@ -151,7 +282,11 @@ export default class WorkSpace extends React.Component {
 		}
 
 		var position = this.state.dragPosition;
-		var matching = this.state.maps
+		var maps = [];
+		for (let i in this.state.maps) {
+			maps.push(this.state.maps[i]);
+		}
+		var matching = maps
 			.filter(
 				m => (
 					m.id !== parseInt(this.state.dragMap) &&
@@ -167,8 +302,12 @@ export default class WorkSpace extends React.Component {
 
 	render() {
 		var renderedMaps = [];
-		for (var i in this.state.maps) {
+		for (let i in this.state.maps) {
 			let map = this.state.maps[i];
+			if (map.stackID !== null) {
+				continue;
+			}
+
 			let {
 				center,
 				zoom,
@@ -179,7 +318,7 @@ export default class WorkSpace extends React.Component {
 
 			renderedMaps.push(
 				<Window
-					key={i}
+					key={'map-'+i}
 					onFocus={this.onMapFocused.bind(this, i)}
 					onMove={this.onMapPropsChanged.bind(this, i)}
 					onResize={this.onMapPropsChanged.bind(this, i)}
@@ -199,11 +338,35 @@ export default class WorkSpace extends React.Component {
 			);
 		}
 
+		for (let i in this.state.stacks) {
+			let stack = this.state.stacks[i];
+			let {width, height, maps, ...windowProps} = stack;
+
+			renderedMaps.push(
+				<Window
+					key={"stack-"+i}
+					onFocus={this.onStackFocused.bind(this, i)}
+					onMove={this.onStackPropsChanged.bind(this, i)}
+					onResize={this.onStackPropsChanged.bind(this, i)}
+					onClose={this.onStackClosed.bind(this, i)}
+					onTitleChange={this.onStackTitleChanged.bind(this, i)}
+					{...{width, height}}
+					{...windowProps}>
+					<p>{JSON.stringify(stack.maps)}</p>
+				</Window>
+			);
+		}
+
 		var highlightDiv = null;
 		var highlightedMap = this.getHighlightedMap();
 		if (highlightedMap !== null) {
+			let zOrder = highlightedMap.zOrder;
+			if (highlightedMap.stackID !== null) {
+				zOrder = this.state.stacks[highlightedMap.stackID].zOrder;
+			}
+
 			var highlightStyle = {
-				zIndex: highlightIndex(highlightedMap.zOrder),
+				zIndex: highlightIndex(zOrder),
 				top: highlightedMap.top,
 				left: highlightedMap.left,
 				width: (highlightedMap.width - 18)+'px',

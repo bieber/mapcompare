@@ -44,7 +44,7 @@ export default class Window extends React.Component {
 	onMoveStart(event) {
 		this.moveStart = {x: event.clientX, y: event.clientY};
 		this.positionStart = {left: this.props.left, top: this.props.top};
-		this.props.onDragStart();
+		(this.props.onDragStart || (() => undefined))();
 	}
 
 	onMove(event) {
@@ -55,7 +55,9 @@ export default class Window extends React.Component {
 			left: this.positionStart.left + event.clientX - this.moveStart.x,
 			top: this.positionStart.top + event.clientY - this.moveStart.y,
 		});
-		this.props.onDrag({x: event.clientX, y: event.clientY});
+		(this.props.onDrag || (() => undefined))(
+			{x: event.clientX, y: event.clientY},
+		);
  	}
 
 	onResizeStart(event) {
@@ -122,7 +124,7 @@ export default class Window extends React.Component {
 					draggable={true}
 					onDragStart={::this.onMoveStart}
 					onDrag={::this.onMove}
-					onDragEnd={this.props.onDragEnd}
+					onDragEnd={this.props.onDragEnd || (() => undefined)}
 					onDoubleClick={::this.onTitleEditStart}
 				/>
 			);
@@ -169,9 +171,9 @@ Window.propTypes = {
 	onResize: React.PropTypes.func.isRequired,
 	onClose: React.PropTypes.func.isRequired,
 	onTitleChange: React.PropTypes.func.isRequired,
-	onDragStart: React.PropTypes.func.isRequired,
-	onDrag: React.PropTypes.func.isRequired,
-	onDragEnd: React.PropTypes.func.isRequired,
+	onDragStart: React.PropTypes.func,
+	onDrag: React.PropTypes.func,
+	onDragEnd: React.PropTypes.func,
 	zOrder: React.PropTypes.number.isRequired,
 	left: React.PropTypes.number.isRequired,
 	top: React.PropTypes.number.isRequired,
