@@ -22,6 +22,7 @@ import update from 'react-addons-update';
 
 import MainControls from './MainControls.js';
 import Map from './Map.js';
+import MapStack from './MapStack.js';
 import Window from './Window.js';
 
 import {highlightIndex} from './zIndices.js';
@@ -182,7 +183,7 @@ export default class WorkSpace extends React.Component {
 				delta.stacks[stackID].maps[this.state.dragMap] = {
 					$set: {
 						order: Object.keys(maps).length,
-						opacity: 100,
+						opacity: 1.,
 					},
 				};
 			} else {
@@ -191,11 +192,11 @@ export default class WorkSpace extends React.Component {
 				let mapsInfo = {};
 				mapsInfo[this.state.dragMap] = {
 					order: 1,
-					opacity: 100,
+					opacity: 1.,
 				};
 				mapsInfo[highlighted.id] = {
 					order: 0,
-					opacity: 100,
+					opacity: 1.,
 				};
 				delta.stacks[newID] = {
 					$set: {
@@ -352,7 +353,12 @@ export default class WorkSpace extends React.Component {
 					onTitleChange={this.onStackTitleChanged.bind(this, i)}
 					{...{width, height}}
 					{...windowProps}>
-					<p>{JSON.stringify(stack.maps)}</p>
+					<MapStack
+						stack={stack}
+						allMaps={this.state.maps}
+						onMapCenterChange={::this.onMapCenterChanged}
+						onMapZoomChange={::this.onMapZoomChanged}
+					/>
 				</Window>
 			);
 		}

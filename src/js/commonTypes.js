@@ -17,17 +17,20 @@
  * along with mapcompare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const BASE = 50;
-const INCREMENT = 100;
+import React from 'react';
 
-export function windowIndex(zOrder) {
-	return zOrder * INCREMENT + BASE;
-}
+export const allMapsPropType = React.PropTypes.objectOf(
+	React.PropTypes.shape({
+		id: React.PropTypes.number.isRequired,
+		title: React.PropTypes.string.isRequired,
+	}),
+);
 
-export function highlightIndex(zOrder) {
-	return (zOrder + 1) * INCREMENT + BASE - 1;
-}
-
-export function controlPanelIndex(zOrder) {
-	return zOrder * INCREMENT + BASE - 1;
-}
+export const stackPropType = React.PropTypes.shape({
+	maps: React.PropTypes.objectOf(
+		React.PropTypes.shape({
+			order: React.PropTypes.number.isRequired,
+			opacity: React.PropTypes.number.isRequired,
+		}),
+	),
+});

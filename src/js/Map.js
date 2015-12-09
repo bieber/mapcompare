@@ -122,7 +122,21 @@ export default class Map extends React.Component {
 		if (existingMap) {
 			searchBoxBounds = existingMap.getBounds();
 		}
-		var mapContainer = <div className="map_container" />;
+
+		var containerStyle = {};
+		if (this.props.zIndex) {
+			containerStyle.zIndex = this.props.zIndex;
+		}
+		if (this.props.opacity) {
+			containerStyle.opacity = this.props.opacity;
+		}
+		var mapContainer = (
+			<div
+				className="map_container"
+				style={containerStyle}
+			/>
+		);
+
 		var map = (
 			<GoogleMap
 				ref="map"
@@ -150,6 +164,8 @@ export default class Map extends React.Component {
 	}
 }
 Map.propTypes = {
+	zIndex: React.PropTypes.number,
+	opacity: React.PropTypes.number,
 	onCenterChange: React.PropTypes.func.isRequired,
 	onZoomChange: React.PropTypes.func.isRequired,
 	width: React.PropTypes.number.isRequired,
