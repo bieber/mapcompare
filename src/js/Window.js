@@ -19,10 +19,10 @@
 
 import React from 'react';
 
-import {windowIndex} from './zIndices.js';
+import {windowIndex, controlPanelIndex} from './zIndices.js';
 
-const MIN_WIDTH = 200;
-const MIN_HEIGHT = 200;
+const MIN_WIDTH = 300;
+const MIN_HEIGHT = 300;
 
 const ENTER = 13;
 
@@ -141,26 +141,51 @@ export default class Window extends React.Component {
 			);
 		}
 
-		return (
-			<div
-				className="map_window"
-				style={windowStyle}
-				onMouseDown={this.props.onFocus}>
-				{titleLabel}
-				{header}
+		var content = null;
+		var controlPanel = null;
+		if (React.Children.count(this.props.children) === 1) {
+			content = this.props.children;
+		} else {
+			content = this.props.children[0];
+			let panelStyle = {
+				zIndex: controlPanelIndex(this.props.zOrder),
+				left: (this.props.left + this.props.width - 10)+'px',
+				top: (this.props.top + 20)+'px',
+				height: (this.props.height - 40)+'px',
+			};
+
+			controlPanel = (
 				<div
-					className="map_window_drag_handle"
-					draggable={true}
-					onDragStart={::this.onResizeStart}
-					onDrag={::this.onResize}
-				/>
-				{titleEditor}
-				<a
-					className="map_window_x"
-					onClick={::this.onClose}>
-					X
-				</a>
-				{this.props.children}
+					className="map_window_control_panel"
+					style={panelStyle}>
+					{this.props.children[1]}
+				</div>
+			);
+		}
+
+		return (
+			<div>
+				<div
+					className="map_window"
+					style={windowStyle}
+					onMouseDown={this.props.onFocus}>
+					{titleLabel}
+					{header}
+					<div
+						className="map_window_drag_handle"
+						draggable={true}
+						onDragStart={::this.onResizeStart}
+						onDrag={::this.onResize}
+					/>
+					{titleEditor}
+					<a
+						className="map_window_x"
+						onClick={::this.onClose}>
+						X
+					</a>
+					{content}
+				</div>
+				{controlPanel}
 			</div>
 		);
 	}

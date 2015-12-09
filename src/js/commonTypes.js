@@ -27,6 +27,8 @@ export const allMapsPropType = React.PropTypes.objectOf(
 );
 
 export const stackPropType = React.PropTypes.shape({
+	syncMovement: React.PropTypes.bool.isRequired,
+	syncZoom: React.PropTypes.bool.isRequired,
 	maps: React.PropTypes.objectOf(
 		React.PropTypes.shape({
 			order: React.PropTypes.number.isRequired,

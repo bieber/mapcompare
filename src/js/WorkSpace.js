@@ -23,6 +23,7 @@ import update from 'react-addons-update';
 import MainControls from './MainControls.js';
 import Map from './Map.js';
 import MapStack from './MapStack.js';
+import StackControlPanel from './StackControlPanel.js';
 import Window from './Window.js';
 
 import {highlightIndex} from './zIndices.js';
@@ -50,6 +51,18 @@ export default class WorkSpace extends React.Component {
 
 	onGlobalSyncZoomChanged(event) {
 		this.setState({globalSyncZoom: event.target.checked});
+	}
+
+	onStackSyncMovementChanged(stackID, event) {
+		var delta = {};
+		delta[stackID] = {$merge: {syncMovement: event.target.checked}};
+		this.setState({stacks: update(this.state.stacks, delta)});
+	}
+
+	onStackSyncZoomChanged(stackID, event) {
+		var delta = {};
+		delta[stackID] = {$merge: {syncZoom: event.target.checked}};
+		this.setState({stacks: update(this.state.stacks, delta)});
 	}
 
 	onAddMap() {
@@ -111,8 +124,16 @@ export default class WorkSpace extends React.Component {
 
 	onMapZoomChanged(mapID, newZoom) {
 		var delta = {};
+		var selectedMap = this.state.maps[mapID];
+		var stackZoomSynced = selectedMap.stackID !== null &&
+			this.state.stacks[selectedMap.stackID].syncZoom;
+
 		if (this.state.globalSyncZoom) {
 			for (let i in this.state.maps) {
+				delta[i] = {$merge: {zoom: newZoom}};
+			}
+		} else if (stackZoomSynced) {
+			for (let i in this.state.stacks[selectedMap.stackID].maps) {
 				delta[i] = {$merge: {zoom: newZoom}};
 			}
 		} else {
@@ -123,12 +144,27 @@ export default class WorkSpace extends React.Component {
 
 	onMapCenterChanged(mapID, newCenter) {
 		var delta = {};
-		if (this.state.globalSyncMovement) {
-			var selectedMap = this.state.maps[mapID];
-			var dLat = newCenter.lat - selectedMap.center.lat;
-			var dLng = newCenter.lng - selectedMap.center.lng;
+		var selectedMap = this.state.maps[mapID];
+		var stackMovementSynced = selectedMap.stackID !== null &&
+			this.state.stacks[selectedMap.stackID].syncMovement;
 
+		var dLat = newCenter.lat - selectedMap.center.lat;
+		var dLng = newCenter.lng - selectedMap.center.lng;
+
+		if (this.state.globalSyncMovement) {
 			for (let i in this.state.maps) {
+				let map = this.state.maps[i];
+				delta[i] = {
+					$merge: {
+						center: {
+							lat: map.center.lat + dLat,
+							lng: map.center.lng + dLng,
+						},
+					},
+				};
+			}
+		} else if (stackMovementSynced) {
+			for (let i in this.state.stacks[selectedMap.stackID].maps) {
 				let map = this.state.maps[i];
 				delta[i] = {
 					$merge: {
@@ -208,6 +244,8 @@ export default class WorkSpace extends React.Component {
 						width: highlighted.width,
 						height: highlighted.height,
 						maps: mapsInfo,
+						syncMovement: false,
+						syncZoom: false,
 					},
 				};
 
@@ -343,6 +381,10 @@ export default class WorkSpace extends React.Component {
 			let stack = this.state.stacks[i];
 			let {width, height, maps, ...windowProps} = stack;
 
+			let syncMovementHandler = this.onStackSyncMovementChanged
+				.bind(this, i);
+			let syncZoomHandler = this.onStackSyncZoomChanged
+				.bind(this, i);
 			renderedMaps.push(
 				<Window
 					key={"stack-"+i}
@@ -358,6 +400,12 @@ export default class WorkSpace extends React.Component {
 						allMaps={this.state.maps}
 						onMapCenterChange={::this.onMapCenterChanged}
 						onMapZoomChange={::this.onMapZoomChanged}
+					/>
+					<StackControlPanel
+						stack={stack}
+						allMaps={this.state.maps}
+						onSyncMovementChanged={syncMovementHandler}
+						onSyncZoomChanged={syncZoomHandler}
 					/>
 				</Window>
 			);

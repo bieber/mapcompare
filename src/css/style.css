@@ -69,6 +69,26 @@ div.map_window {
 	border-radius: 10px;
 }
 
+div.map_window_control_panel {
+	position: absolute;
+	width: 210px;
+
+	background-color: gray;
+	border: 1px solid white;
+	border-radius: 10px;
+
+	color: white;
+	font-size: 18px;
+}
+
+div.map_window_control_panel_inner {
+	position: absolute;
+	left: 15px;
+	top: 5px;
+	right: 5px;
+	bottom: 5px;
+}
+
 div.map_window_header {
 	position: absolute;
 	top: 0;
