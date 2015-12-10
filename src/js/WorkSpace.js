@@ -181,6 +181,16 @@ export default class WorkSpace extends React.Component {
 		this.setState({maps: update(this.state.maps, delta)});
 	}
 
+	onMapOpacityChanged(mapID, event) {
+		var map = this.state.maps[mapID];
+		var delta = {};
+		delta[map.stackID] = {maps: {}};
+		delta[map.stackID].maps[mapID] = {
+			$merge: {opacity: parseFloat(event.target.value)},
+		};
+		this.setState({stacks: update(this.state.stacks, delta)});
+	}
+
 	onMapDragStarted(mapID) {
 		this.setState({dragMap: mapID});
 	}
@@ -406,6 +416,7 @@ export default class WorkSpace extends React.Component {
 						allMaps={this.state.maps}
 						onSyncMovementChanged={syncMovementHandler}
 						onSyncZoomChanged={syncZoomHandler}
+						onMapOpacityChanged={::this.onMapOpacityChanged}
 					/>
 				</Window>
 			);

@@ -25,25 +25,55 @@ export default class StackControlPanel extends React.Component {
 	render() {
 		var {stack, allMaps} = this.props;
 
+		var renderedMaps = [];
+		var maps = [];
+		for (let i in stack.maps) {
+			maps.push({...stack.maps[i], ...allMaps[i]});
+		}
+		maps = maps.sort((a, b) => b.order - a.order);
+
+		for (let i in maps) {
+			let map = maps[i];
+			let onChangeHandler = this.props.onMapOpacityChanged
+				.bind(null, map.id);
+			renderedMaps.push(
+				<div key={map.id} className="map_window_control_panel_map">
+					<span>{map.title}</span>
+					<br />
+					<input
+						type="range"
+						value={map.opacity}
+						min={0}
+						max={1}
+						step={0.05}
+						onChange={onChangeHandler}
+					/>
+				</div>
+			);
+		}
+
 		return (
 			<div className="map_window_control_panel_inner">
-				<label>
-					<input
-						type="checkbox"
-						checked={stack.syncMovement}
-						onChange={this.props.onSyncMovementChanged}
-					/>
-					Sync Movement
-				</label>
-				<br />
-				<label>
-					<input
-						type="checkbox"
-						checked={stack.syncZoom}
-						onChange={this.props.onSyncZoomChanged}
-					/>
-					Sync Zoom
-				</label>
+				<div className="map_window_control_panel_checkboxes">
+					<label>
+						<input
+							type="checkbox"
+							checked={stack.syncMovement}
+							onChange={this.props.onSyncMovementChanged}
+						/>
+						Sync Movement
+					</label>
+					<br />
+					<label>
+						<input
+							type="checkbox"
+							checked={stack.syncZoom}
+							onChange={this.props.onSyncZoomChanged}
+						/>
+						Sync Zoom
+					</label>
+				</div>
+				{renderedMaps}
 			</div>
 		);
 	}
@@ -53,4 +83,5 @@ StackControlPanel.propTypes = {
 	allMaps: allMapsPropType.isRequired,
 	onSyncMovementChanged: React.PropTypes.func.isRequired,
 	onSyncZoomChanged: React.PropTypes.func.isRequired,
+	onMapOpacityChanged: React.PropTypes.func.isRequired,
 };

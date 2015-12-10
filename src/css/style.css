@@ -47,7 +47,7 @@ div#main_controls {
 	z-index: 1000;
 }
 
-div#main_controls input[type=button] {
+div#main_controls input[type="button"] {
 	margin-top: 5px;
 	font-size: 20px;
 }
@@ -87,6 +87,31 @@ div.map_window_control_panel_inner {
 	top: 5px;
 	right: 5px;
 	bottom: 5px;
+
+	overflow: auto;
+}
+
+div.map_window_control_panel_checkboxes {
+	margin-bottom: 8px;
+}
+
+div.map_window_control_panel_map {
+	padding: 4px 4px 4px 4px;
+
+	border-left: 1px dashed white;
+	border-right: 1px dashed white;
+	border-top: 1px dashed white;
+
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+div.map_window_control_panel_map:last-child {
+	border-bottom: 1px dashed white;
+}
+
+div.map_window_control_panel_map input[type="range"] {
+	width: 170px;
 }
 
 div.map_window_header {

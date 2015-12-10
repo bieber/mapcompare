@@ -127,7 +127,7 @@ export default class Map extends React.Component {
 		if (this.props.zIndex) {
 			containerStyle.zIndex = this.props.zIndex;
 		}
-		if (this.props.opacity) {
+		if (this.props.opacity !== undefined) {
 			containerStyle.opacity = this.props.opacity;
 		}
 		var mapContainer = (
