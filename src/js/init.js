@@ -20,6 +20,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import {drag} from './DragManager.js';
+
 import WorkSpace from './WorkSpace.js';
 
 import Config from '../config/config.js';
@@ -29,6 +31,7 @@ window.init = () => {
 		<WorkSpace />,
 		document.getElementById('top_container'),
 	);
+	window.addEventListener('dragover', drag);
 }
 
 export default function() {

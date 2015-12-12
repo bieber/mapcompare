@@ -19,6 +19,8 @@
 
 import React from 'react';
 
+import {dragStart, dragEnd} from './DragManager.js';
+
 import {windowIndex, controlPanelIndex} from './zIndices.js';
 
 const MIN_WIDTH = 300;
@@ -42,6 +44,8 @@ export default class Window extends React.Component {
 	}
 
 	onMoveStart(event) {
+		event.dataTransfer.setData('text/plain', '');
+		dragStart(::this.onMove);
 		this.moveStart = {x: event.clientX, y: event.clientY};
 		this.positionStart = {left: this.props.left, top: this.props.top};
 		(this.props.onDragStart || (() => undefined))();
@@ -60,7 +64,14 @@ export default class Window extends React.Component {
 		);
  	}
 
+	onMoveEnd(event) {
+		dragEnd();
+		(this.props.onDragEnd || (() => undefined))();
+	}
+
 	onResizeStart(event) {
+		event.dataTransfer.setData('text/plain', '');
+		dragStart(::this.onResize);
 		this.resizeStart = {x: event.clientX, y: event.clientY};
 		this.sizeStart = {width: this.props.width, height: this.props.height};
 	}
@@ -123,8 +134,7 @@ export default class Window extends React.Component {
 					style={{width: this.props.width+'px'}}
 					draggable={true}
 					onDragStart={::this.onMoveStart}
-					onDrag={::this.onMove}
-					onDragEnd={this.props.onDragEnd || (() => undefined)}
+					onDragEnd={::this.onMoveEnd}
 					onDoubleClick={::this.onTitleEditStart}
 				/>
 			);
@@ -175,7 +185,7 @@ export default class Window extends React.Component {
 						className="map_window_drag_handle"
 						draggable={true}
 						onDragStart={::this.onResizeStart}
-						onDrag={::this.onResize}
+						onDragEnd={dragEnd}
 					/>
 					{titleEditor}
 					<a

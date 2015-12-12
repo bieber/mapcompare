@@ -114,7 +114,7 @@ div.map_window_control_panel_map:last-child {
 }
 
 div.map_window_control_panel_map input[type="range"] {
-	width: 96px;
+	width: 82px;
 	margin-left: 8px;
 	vertical-align: middle;
 }
