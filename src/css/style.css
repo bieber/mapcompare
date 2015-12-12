@@ -55,8 +55,6 @@ div#main_controls input[type="button"] {
 div.map_highlight {
 	position: absolute;
 
-	padding-right: -10px;
-
 	border: 10px solid red;
 	border-radius: 10px;
 }
