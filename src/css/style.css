@@ -105,6 +105,8 @@ div.map_window_control_panel_map {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+
+	cursor: move;
 }
 
 div.map_window_control_panel_map:last-child {
@@ -117,7 +119,19 @@ div.map_window_control_panel_map input[type="range"] {
 	vertical-align: middle;
 }
 
-div.map_window_control_panel_map a {
+a.map_window_control_panel_arrow_down_button {
+	position: absolute;
+	right: 44px;
+	top: 4px;
+}
+
+a.map_window_control_panel_arrow_up_button {
+	position: absolute;
+	right: 24px;
+	top: 4px;
+}
+
+a.map_window_control_panel_split_button {
 	position: absolute;
 	right: 4px;
 	top: 4px;

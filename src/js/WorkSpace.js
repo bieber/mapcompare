@@ -191,6 +191,48 @@ export default class WorkSpace extends React.Component {
 		this.setState({stacks: update(this.state.stacks, delta)});
 	}
 
+	onMapMovedUp(mapID) {
+		var map = this.state.maps[mapID];
+		var stack = this.state.stacks[map.stackID];
+		var delta = {};
+		delta[stack.id] = {maps: {}};
+
+		delta[stack.id].maps[mapID] = {
+			$merge: {order: stack.maps[mapID].order + 1},
+		};
+		for (let i in stack.maps) {
+			let stackMap = stack.maps[i];
+			if (stackMap.order === stack.maps[mapID].order + 1) {
+				delta[stack.id].maps[i] = {
+					$merge: {order: stack.maps[mapID].order},
+				};
+			}
+		}
+
+		this.setState({stacks: update(this.state.stacks, delta)});
+	}
+
+	onMapMovedDown(mapID) {
+		var map = this.state.maps[mapID];
+		var stack = this.state.stacks[map.stackID];
+		var delta = {};
+		delta[stack.id] = {maps: {}};
+
+		delta[stack.id].maps[mapID] = {
+			$merge: {order: stack.maps[mapID].order - 1},
+		};
+		for (let i in stack.maps) {
+			let stackMap = stack.maps[i];
+			if (stackMap.order === stack.maps[mapID].order - 1) {
+				delta[stack.id].maps[i] = {
+					$merge: {order: stack.maps[mapID].order},
+				};
+			}
+		}
+
+		this.setState({stacks: update(this.state.stacks, delta)});
+	}
+
 	onMapSplit(mapID, event) {
 		var targetMap = this.state.maps[mapID];
 		var stackID = targetMap.stackID;
@@ -217,6 +259,14 @@ export default class WorkSpace extends React.Component {
 			let stack = this.state.stacks[i];
 			if (stack.zOrder > targetMap.zOrder) {
 				stacksDelta[i] = {$merge: {zOrder: stack.zOrder - 1}};
+			}
+		}
+
+		stacksDelta[stackID].maps = {};
+		for (let i in stack.maps) {
+			let map = stack.maps[i];
+			if (map.order > stack.maps[mapID].order) {
+				stacksDelta[stackID].maps[i] = {$merge: {order: map.order - 1}};
 			}
 		}
 
@@ -462,6 +512,8 @@ export default class WorkSpace extends React.Component {
 						onSyncMovementChanged={syncMovementHandler}
 						onSyncZoomChanged={syncZoomHandler}
 						onMapOpacityChanged={::this.onMapOpacityChanged}
+						onMapMovedUp={::this.onMapMovedUp}
+						onMapMovedDown={::this.onMapMovedDown}
 						onMapSplit={::this.onMapSplit}
 					/>
 				</Window>

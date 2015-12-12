@@ -22,9 +22,21 @@ import React from 'react';
 import {allMapsPropType, stackPropType} from './commonTypes.js';
 
 export default class StackControlPanel extends React.Component {
+	constructor(props, context) {
+		super(props, context);
+
+		this.state = {
+			dragMap: null,
+		};
+	}
+
 	onSplitLinkClicked(mapID, event) {
 		event.stopPropagation();
 		this.props.onMapSplit(mapID);
+	}
+
+	onDragStart(mapID) {
+		this.setState({dragMap: mapID});
 	}
 
 	render() {
@@ -41,10 +53,37 @@ export default class StackControlPanel extends React.Component {
 			let map = maps[i];
 			let onChangeHandler = this.props.onMapOpacityChanged
 				.bind(null, map.id);
+
+			let upArrow = null;
+			let downArrow = null;
+			if (map.order !== 0) {
+				downArrow = (
+					<a
+						className="map_window_control_panel_arrow_down_button"
+						href="#"
+						onClick={this.props.onMapMovedDown.bind(this, map.id)}>
+						<img src="arrow_down.png" alt="Move map down" />
+					</a>
+				);
+			}
+			if (map.order < Object.keys(maps).length - 1) {
+				upArrow = (
+					<a
+						className="map_window_control_panel_arrow_up_button"
+						href="#"
+						onClick={this.props.onMapMovedUp.bind(this, map.id)}>
+						<img src="arrow_up.png" alt="Move map up" />
+					</a>
+				);
+			}
+
 			renderedMaps.push(
 				<div key={map.id} className="map_window_control_panel_map">
 					<span>{map.title}</span>
+					{downArrow}
+					{upArrow}
 					<a
+						className="map_window_control_panel_split_button"
 						href="#"
 						onClick={this.onSplitLinkClicked.bind(this, map.id)}>
 						<img src="box.png" 	alt="Split to separate window" />
@@ -97,5 +136,7 @@ StackControlPanel.propTypes = {
 	onSyncMovementChanged: React.PropTypes.func.isRequired,
 	onSyncZoomChanged: React.PropTypes.func.isRequired,
 	onMapOpacityChanged: React.PropTypes.func.isRequired,
+	onMapMovedUp: React.PropTypes.func.isRequired,
+	onMapMovedDown: React.PropTypes.func.isRequired,
 	onMapSplit: React.PropTypes.func.isRequired,
 };
