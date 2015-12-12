@@ -104,6 +104,7 @@ div.map_window_control_panel_map {
 
 	white-space: nowrap;
 	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 div.map_window_control_panel_map:last-child {
@@ -111,7 +112,9 @@ div.map_window_control_panel_map:last-child {
 }
 
 div.map_window_control_panel_map input[type="range"] {
-	width: 170px;
+	width: 96px;
+	margin-left: 8px;
+	vertical-align: middle;
 }
 
 div.map_window_header {

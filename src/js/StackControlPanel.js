@@ -40,14 +40,17 @@ export default class StackControlPanel extends React.Component {
 				<div key={map.id} className="map_window_control_panel_map">
 					<span>{map.title}</span>
 					<br />
-					<input
-						type="range"
-						value={map.opacity}
-						min={0}
-						max={1}
-						step={0.05}
-						onChange={onChangeHandler}
-					/>
+					<label>
+						Opacity
+						<input
+							type="range"
+							value={map.opacity}
+							min={0}
+							max={1}
+							step={0.05}
+							onChange={onChangeHandler}
+						/>
+					</label>
 				</div>
 			);
 		}
