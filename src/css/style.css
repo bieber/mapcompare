@@ -96,6 +96,8 @@ div.map_window_control_panel_checkboxes {
 }
 
 div.map_window_control_panel_map {
+	position: relative;
+
 	padding: 4px 4px 4px 4px;
 
 	border-left: 1px dashed white;
@@ -115,6 +117,12 @@ div.map_window_control_panel_map input[type="range"] {
 	width: 96px;
 	margin-left: 8px;
 	vertical-align: middle;
+}
+
+div.map_window_control_panel_map a {
+	position: absolute;
+	right: 4px;
+	top: 4px;
 }
 
 div.map_window_header {

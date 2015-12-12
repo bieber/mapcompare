@@ -22,6 +22,11 @@ import React from 'react';
 import {allMapsPropType, stackPropType} from './commonTypes.js';
 
 export default class StackControlPanel extends React.Component {
+	onSplitLinkClicked(mapID, event) {
+		event.stopPropagation();
+		this.props.onMapSplit(mapID);
+	}
+
 	render() {
 		var {stack, allMaps} = this.props;
 
@@ -39,6 +44,11 @@ export default class StackControlPanel extends React.Component {
 			renderedMaps.push(
 				<div key={map.id} className="map_window_control_panel_map">
 					<span>{map.title}</span>
+					<a
+						href="#"
+						onClick={this.onSplitLinkClicked.bind(this, map.id)}>
+						<img src="box.png" 	alt="Split to separate window" />
+					</a>
 					<br />
 					<label>
 						Opacity
@@ -87,4 +97,5 @@ StackControlPanel.propTypes = {
 	onSyncMovementChanged: React.PropTypes.func.isRequired,
 	onSyncZoomChanged: React.PropTypes.func.isRequired,
 	onMapOpacityChanged: React.PropTypes.func.isRequired,
+	onMapSplit: React.PropTypes.func.isRequired,
 };

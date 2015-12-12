@@ -51,10 +51,14 @@ gulp.task('build', function() {
 
 	gulp.src('./src/css/*.css')
 		.pipe(gulp.dest('./build/'));
+
+	gulp.src('./img/*.png')
+		.pipe(gulp.dest('./build/'));
 });
 
 gulp.task('watch', function() {
 	gulp.watch('./src/**/*', ['build']);
+	gulp.watch('./img/**/*', ['build']);
 });
 
 gulp.task('default', ['build', 'watch']);

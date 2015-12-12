@@ -191,6 +191,51 @@ export default class WorkSpace extends React.Component {
 		this.setState({stacks: update(this.state.stacks, delta)});
 	}
 
+	onMapSplit(mapID, event) {
+		var targetMap = this.state.maps[mapID];
+		var stackID = targetMap.stackID;
+		var stack = this.state.stacks[targetMap.stackID];
+
+		var mapsDelta = {};
+		var stacksDelta = {};
+		mapsDelta[mapID] = {
+			$merge: {
+				stackID: null,
+				left: targetMap.left + 10,
+				top: targetMap.top + 10,
+				zOrder: this.objectCount() - 1,
+			},
+		};
+
+		for (let i in this.state.maps) {
+			let map = this.state.maps[i];
+			if (map.zOrder > targetMap.zOrder) {
+				mapsDelta[i] = {$merge: {zOrder: map.zOrder - 1}};
+			}
+		}
+		for (let i in this.state.stacks) {
+			let stack = this.state.stacks[i];
+			if (stack.zOrder > targetMap.zOrder) {
+				stacksDelta[i] = {$merge: {zOrder: stack.zOrder - 1}};
+			}
+		}
+
+		var stacks = update(this.state.stacks, stacksDelta);
+		if (Object.keys(stack.maps).length === 2) {
+			for (let i in stack.maps) {
+				if (i !== mapID.toString()) {
+					mapsDelta[i] = {$merge: {stackID: null}};
+				}
+			}
+			delete stacks[stackID];
+		} else {
+			delete stacks[stackID].maps[mapID];
+		}
+
+		var maps = update(this.state.maps, mapsDelta);
+		this.setState({maps, stacks});
+	}
+
 	onMapDragStarted(mapID) {
 		this.setState({dragMap: mapID});
 	}
@@ -417,6 +462,7 @@ export default class WorkSpace extends React.Component {
 						onSyncMovementChanged={syncMovementHandler}
 						onSyncZoomChanged={syncZoomHandler}
 						onMapOpacityChanged={::this.onMapOpacityChanged}
+						onMapSplit={::this.onMapSplit}
 					/>
 				</Window>
 			);
