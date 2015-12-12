@@ -20,6 +20,7 @@
 import React from 'react';
 import update from 'react-addons-update';
 
+import Instructions from './Instructions.js';
 import MainControls from './MainControls.js';
 import Map from './Map.js';
 import MapStack from './MapStack.js';
@@ -28,14 +29,22 @@ import Window from './Window.js';
 
 import {highlightIndex} from './zIndices.js';
 
+const INSTRUCTIONS_WIDTH = 500;
+const INSTRUCTIONS_HEIGHT = 350;
+
 export default class WorkSpace extends React.Component {
 	constructor(props, context) {
 		super(props, context);
 
 		this.lastMapID = 0;
 		this.lastStackID = 0;
-
 		this.state = {
+			instructionsPosition: {
+				left: (window.innerWidth - INSTRUCTIONS_WIDTH) / 2,
+				top: (window.innerHeight - INSTRUCTIONS_HEIGHT) / 2,
+				width: INSTRUCTIONS_WIDTH,
+				height: INSTRUCTIONS_HEIGHT,
+			},
 			globalSyncMovement: false,
 			globalSyncZoom: false,
 			maps: {},
@@ -83,6 +92,19 @@ export default class WorkSpace extends React.Component {
 			},
 		};
 		this.setState({maps: update(this.state.maps, delta)});
+	}
+
+	onInstructionsPropsChanged(newProps) {
+		this.setState({
+			instructionsPosition: update(
+				this.state.instructionsPosition,
+				{$merge: newProps},
+			),
+		});
+	}
+
+	onInstructionsClosed() {
+		this.setState({instructionsPosition: null});
 	}
 
 	onMapFocused(mapID) {
@@ -445,6 +467,22 @@ export default class WorkSpace extends React.Component {
 	}
 
 	render() {
+		var instructions = null;
+		if (this.state.instructionsPosition !== null) {
+			instructions = (
+				<Window
+					onFocus={() => undefined}
+					onMove={::this.onInstructionsPropsChanged}
+					onResize={::this.onInstructionsPropsChanged}
+					onClose={::this.onInstructionsClosed}
+					zOrder={this.objectCount()}
+					title="Instructions"
+					{...this.state.instructionsPosition}>
+					<Instructions />
+				</Window>
+			);
+		}
+
 		var renderedMaps = [];
 		for (let i in this.state.maps) {
 			let map = this.state.maps[i];
@@ -552,6 +590,7 @@ export default class WorkSpace extends React.Component {
 					onSyncZoomChanged={::this.onGlobalSyncZoomChanged}
 					onAddMap={::this.onAddMap}
 				/>
+				{instructions}
 				{highlightDiv}
 				{renderedMaps}
 			</div>

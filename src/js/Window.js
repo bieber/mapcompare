@@ -89,6 +89,9 @@ export default class Window extends React.Component {
 	}
 
 	onTitleEditStart(event) {
+		if (!this.props.onTitleChange) {
+			return;
+		}
 		this.setState(
 			{titleEdit: this.props.title},
 			() => this.refs.titleEditor.select(),
@@ -205,7 +208,7 @@ Window.propTypes = {
 	onMove: React.PropTypes.func.isRequired,
 	onResize: React.PropTypes.func.isRequired,
 	onClose: React.PropTypes.func.isRequired,
-	onTitleChange: React.PropTypes.func.isRequired,
+	onTitleChange: React.PropTypes.func,
 	onDragStart: React.PropTypes.func,
 	onDrag: React.PropTypes.func,
 	onDragEnd: React.PropTypes.func,

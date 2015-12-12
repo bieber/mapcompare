@@ -52,6 +52,19 @@ div#main_controls input[type="button"] {
 	font-size: 20px;
 }
 
+div#instructions {
+	color: white;
+	font-size: 18px;
+
+	position: absolute;
+	top: 30px;
+	right: 10px;
+	bottom: 20px;
+	left: 10px;
+
+	overflow: auto;
+}
+
 div.map_highlight {
 	position: absolute;
 
