@@ -22,6 +22,6 @@
  * config.js before building.
  */
 
-export default const config = {
+export default {
 	apiKey: 'YOUR API KEY HERE',
 };
